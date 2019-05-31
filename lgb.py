@@ -25,19 +25,19 @@ def train(filename,columns):
               'metrics': 'multi_logloss',
               'nthread': 10,   #线程数
               'num_class': 9,  #类别数
-              'learning_rate': 0.05,
-              'num_leaves': 100,
+              'learning_rate': 0.02,
+              'num_leaves': 150,
               'max_depth': 12,
               'max_bin': 200, #将feature存入bin的最大值，越大越准，最大255,默认值255
-              'subsample_for_bin': 40000, #用于构建直方图数据的数量，默认值为20000,越大训练效果越好，但速度会越慢
+              'subsample_for_bin': 50000, #用于构建直方图数据的数量，默认值为20000,越大训练效果越好，但速度会越慢
               'subsample': 0.8, #子采样，为了防止过拟合
               'subsample_freq': 1,  #重采样频率,如果为正整数，表示每隔多少次迭代进行bagging
               'colsample_bytree': 0.8, #每棵随机采样的列数的占比,一般取0.5-1
-              'reg_alpha': 0.5, #L1正则化项，越大越保守
+              'reg_alpha': 0.2, #L1正则化项，越大越保守
               'reg_lambda': 0, #L2正则化项，越大越保守
               'min_split_gain': 0.0,
               'min_child_weight': 1, #默认值为1,越大越能避免过拟合，建议使用CV调整
-              'min_child_samples': 20, #alias：min_data_in_leaf 越大越能避免树过深，避免过拟合，但是可能欠拟合 需要CV调整
+              'min_child_samples': 10, #alias：min_data_in_leaf 越大越能避免树过深，避免过拟合，但是可能欠拟合 需要CV调整
               'scale_pos_weight': 1, # 类别不均衡时设定,
               }
     num_round = 3000
@@ -48,7 +48,7 @@ def train(filename,columns):
                                          'top1_2','top2_2','top3_2','top1_3','top2_3','top3_3',
                                          'top1_4','top2_4','top3_4','top1_5','top2_5','top3_5',
                                          'top1_6','top2_6','top3_6','top1_7','top2_7','top3_7'],
-                    valid_sets=lgb_eval, early_stopping_rounds = 1000)
+                    valid_sets=lgb_eval, early_stopping_rounds = 300)
 
     print(model_train.best_iteration)
     model = lgb.train(params, lgb_all, model_train.best_iteration,
@@ -142,7 +142,7 @@ def predict():
     submit = submit.apply(fill_0,axis=1)
     submit.to_csv('observe.csv',index=False)
     submit.to_csv('submit.txt',sep='\t',index=None,header=None)
-    
+
 #run_lgb()
 predict()
 
