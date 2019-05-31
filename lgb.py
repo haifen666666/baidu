@@ -142,6 +142,7 @@ def predict():
     submit = submit.apply(fill_0,axis=1)
     submit.to_csv('observe.csv',index=False)
     submit.to_csv('submit.txt',sep='\t',index=None,header=None)
+    
 #run_lgb()
 predict()
 
