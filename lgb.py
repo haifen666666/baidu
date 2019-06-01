@@ -7,7 +7,7 @@ from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
 
 
-def train(filename,columns):
+def train(filename):
     train = pd.read_csv(filename)
     #train = train[columns]
     train['answer'] = train['answer'] - 1
@@ -15,6 +15,7 @@ def train(filename,columns):
 
     del train['answer']
     del train['area_id']
+    del train['label']
     x_train, x_test, y_train, y_test = train_test_split(train,answer, test_size = 0.2, random_state = 100)
 
     lgb_train = lgb.Dataset(x_train, y_train, free_raw_data=False)
@@ -27,7 +28,7 @@ def train(filename,columns):
               'num_class': 9,  #类别数
               'learning_rate': 0.02,
               'num_leaves': 150,
-              'max_depth': 12,
+              'max_depth': 16,
               'max_bin': 200, #将feature存入bin的最大值，越大越准，最大255,默认值255
               'subsample_for_bin': 50000, #用于构建直方图数据的数量，默认值为20000,越大训练效果越好，但速度会越慢
               'subsample': 0.8, #子采样，为了防止过拟合
@@ -41,6 +42,7 @@ def train(filename,columns):
               'scale_pos_weight': 1, # 类别不均衡时设定,
               }
     num_round = 3000
+
     model_train = lgb.train(params,
                     lgb_train,
                     num_round,
@@ -49,6 +51,19 @@ def train(filename,columns):
                                          'top1_4','top2_4','top3_4','top1_5','top2_5','top3_5',
                                          'top1_6','top2_6','top3_6','top1_7','top2_7','top3_7'],
                     valid_sets=lgb_eval, early_stopping_rounds = 300)
+    #线下验证正确率
+    pred =model_train.predict(x_test)
+    pred = [list(x).index(max(x)) for x in pred]
+    actually = list(y_test['answer'])
+    print(len(pred),len(actually))
+    print(type(pred),type(actually))
+    observe = pd.DataFrame()
+    observe['pred'] = pred
+    observe['actually'] = actually
+    observe['equal'] = observe['pred'] - observe['actually']
+    right = observe[observe['equal'] == 0].shape[0]
+    all = observe.shape[0]
+    print(right/all)
 
     print(model_train.best_iteration)
     model = lgb.train(params, lgb_all, model_train.best_iteration,
@@ -57,12 +72,12 @@ def train(filename,columns):
                                          'top1_4','top2_4','top3_4','top1_5','top2_5','top3_5',
                                          'top1_6','top2_6','top3_6','top1_7','top2_7','top3_7'])
     model.save_model('lgb1.model') # 用于存储训练出的模型
-
     # print(model.feature_importance()) # 看lgb模型特征得分
     dfFeature = pd.DataFrame()
     dfFeature['featureName'] = model.feature_name()
     dfFeature['score'] = model.feature_importance()
     dfFeature.to_csv('featureImportance1.csv')
+
 
 
 def run_lgb():
@@ -97,38 +112,34 @@ def run_lgb():
               'maxA7','minA7','meanA7','medianA7','stdA7','varA7','maxB7','minB7','meanB7','medianB7','stdB7','varB7',
               'maxC7','minC7','meanC7','medianC7','stdC7','varC7','maxD7','minD7','meanD7','medianD7','stdD7','varD7',
               'maxE7','minE7','meanE7','medianE7','stdE7','varE7','top1_7','top2_7','top3_7','date_times_7',
+              'meanBA0','meanCA0','meanDA0','meanEA0','meanBA1','meanCA1','meanDA1','meanEA1','meanBA2','meanCA2','meanDA2',
+              'meanEA2','meanBA3','meanCA3','meanDA3','meanEA3','meanBA5','meanCA5','meanDA5','meanEA5','meanBA6','meanCA6',
+              'meanDA6','meanEA6','meanBA7','meanCA7','meanDA7','meanEA7','percent_date_times_0','percent_date_times_1',
+              'percent_date_times_2','percent_date_times_4','meanA01','meanB01','meanC01','meanD01','meanE01','meanA02',
+              'meanB02','meanC02','meanD02','meanE02','meanA03','meanB03','meanC03','meanD03','meanE03','meanA13','meanB13',
+              'meanC13','meanD13','meanE13','meanA05','meanB05','meanC05','meanD05','meanE05','meanA06','meanB06','meanC06',
+              'meanD06','meanE06','meanA07','meanB07','meanC07','meanD07','meanE07','area_id','answer']
 
-              'area_id','answer']
-    column2 = [
-              'top1_0','top2_0','top3_0','date_times_0',
-
-              'top1_1','top2_1','top3_1','date_times_1',
-
-              'top1_2','top2_2','top3_2','date_times_2',
-
-              'top1_3','top2_3','top3_3','date_times_3',
-
-              'top1_4','top2_4','top3_4','date_times_4',
-
-              'top1_5','top2_5','top3_5','date_times_5',
-
-              'top1_6','top2_6','top3_6','date_times_6',
-
-              'top1_7','top2_7','top3_7','date_times_7',
-
-              'area_id','answer']
-    train('train_feature2.csv',column)
+    train('wjy_train_feature.csv')
 
 def predict():
     model = lgb.Booster(model_file = 'lgb1.model') #init model
-    test = pd.read_csv('test_feature2.csv')
+    test = pd.read_csv('wjy_test_feature.csv')
+    test.sort_values('area_id',inplace=True)
+
     submit = test[['area_id']]
     del test['area_id']
     pred = model.predict(test)
+
+    #得到预测的排序结果，保存下来，用于做结果层面的特征融合
+    lgb_sort = pd.DataFrame(pred,columns=['1','2','3','4','5','6','7','8','9'])
+    lgb_sort.to_csv('lgb_sort.csv',index=False)
+
+    #选出概率最大的一个，拿到对应label，作为类标号
     pred = [list(x).index(max(x)) for x in pred]
     submit['answer'] = pred
 
-
+    #按照提交格式，处理数据后保存
     submit['answer'] = submit['answer'] + 1
     submit['area_id'] = submit['area_id'].astype('str')
     submit['answer'] = submit['answer'].astype('str')
@@ -139,12 +150,15 @@ def predict():
         dd = (3 - len(x.answer)) * '0'
         x.answer = dd + x.answer
         return x
+
     submit = submit.apply(fill_0,axis=1)
-    submit.to_csv('observe.csv',index=False)
+    submit.to_csv('observe.csv',index=False)  #为了便于查看答案的分布
     submit.to_csv('submit.txt',sep='\t',index=None,header=None)
 
-#run_lgb()
-predict()
+
+if __name__ == '__main__':
+    run_lgb()
+    #predict()
 
 
 

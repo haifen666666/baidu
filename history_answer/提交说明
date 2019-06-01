@@ -1,3 +1,4 @@
 submit1   得分 0.6056   logloss 1.266  ps: baseline 根据小时做的特征 没有横向比较
 submit2   得分 0.6213   logloss 1.214  ps: 特征间的除法运算，具体操作见pre_train3
 submit3   得分 0.6231   logloss 1.196  ps: lgb调参
+submit4   得分 0.6444   logloss 1.163  ps: 融合汪佳宇特征 + lgb调参  从此版本开始，附加对应版本的lgb_sort用于做结果层面的融合
