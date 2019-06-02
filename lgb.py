@@ -5,10 +5,13 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 
 def train(filename):
     train = pd.read_csv(filename)
+    train = shuffle(train)
+    train = shuffle(train)
     #train = train[columns]
     train['answer'] = train['answer'] - 1
     answer = train[['answer']]
@@ -42,7 +45,7 @@ def train(filename):
               'scale_pos_weight': 1, # 类别不均衡时设定,
               }
     num_round = 3000
-
+    
     model_train = lgb.train(params,
                     lgb_train,
                     num_round,
@@ -72,7 +75,6 @@ def train(filename):
                                          'top1_4','top2_4','top3_4','top1_5','top2_5','top3_5',
                                          'top1_6','top2_6','top3_6','top1_7','top2_7','top3_7'])
     model.save_model('lgb1.model') # 用于存储训练出的模型
-    # print(model.feature_importance()) # 看lgb模型特征得分
     dfFeature = pd.DataFrame()
     dfFeature['featureName'] = model.feature_name()
     dfFeature['score'] = model.feature_importance()
@@ -120,11 +122,11 @@ def run_lgb():
               'meanC13','meanD13','meanE13','meanA05','meanB05','meanC05','meanD05','meanE05','meanA06','meanB06','meanC06',
               'meanD06','meanE06','meanA07','meanB07','meanC07','meanD07','meanE07','area_id','answer']
 
-    train('wjy_train_feature.csv')
+    train('train_feature4.csv')
 
 def predict():
     model = lgb.Booster(model_file = 'lgb1.model') #init model
-    test = pd.read_csv('wjy_test_feature.csv')
+    test = pd.read_csv('test_feature4.csv')
     test.sort_values('area_id',inplace=True)
 
     submit = test[['area_id']]
@@ -157,8 +159,8 @@ def predict():
 
 
 if __name__ == '__main__':
-    run_lgb()
-    #predict()
+    #run_lgb()
+    predict()
 
 
 

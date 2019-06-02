@@ -1,0 +1,7 @@
+pre_train1.py  对数据预处理  拿到  小时  天  上午/下午。。。  粒度的统计数据    visit_hour.h5  visit_day.h5  visit_quarter.h5
+pre_train2.py  对小时粒度数据 打上时间标签 提取特征 visit_hour_new.csv(分两次处理后叠加的)   train_feature.csv
+pre_train3.py  对小时粒度的特征构建组合特征  train_feature2.csv
+pre_train4.py  添加day维度的特征  train_feature3.csv
+feature_merge.py   融合 wjy特征和day维度特征  train_feature4.csv
+
+

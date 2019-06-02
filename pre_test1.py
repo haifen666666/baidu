@@ -52,9 +52,9 @@ def get_visit_hour():
 
 #将当前txt文件中的访问记录整合为csv,后转换为list返回,精确到天(统计人数，同一天一个人的多次记录算一次)
 def txt2csv_day(filename):
-    name = list(filename.strip('.txt').split('_'))
-    area_id,func_id = list(map(int,name))
-    file = os.path.join('./train',filename)
+    name = filename.strip('.txt')
+    area_id = int(name)
+    file = os.path.join('./test',filename)
     result = []
     with open(file,'r') as f:
         for line in f:
@@ -70,26 +70,24 @@ def txt2csv_day(filename):
         result = pd.DataFrame(result,columns = ['year','month','day'])
         result2 = result.groupby(['year','month','day'],as_index=False)['day'].agg({'numbers':'count'})
         result2['area_id'] = [area_id] * result2.shape[0]
-        result2['func_id'] = [func_id] * result2.shape[0]
         result2 = result2.values.tolist()
         return result2
 
 #遍历文件夹内的所有txt文件，逐个变为list后，融入到大的list，最后转为visit.csv(统计的是人次，一个人一天内多次访问记录算一次)
 def get_visit_day():
     visit = []
-    file_lis = os.listdir('./train')
+    file_lis = os.listdir('./test')
     cur_num = 0  #当前处理文件数
     file_num = len(file_lis) #总文件数
     start = time.time()
     for file in file_lis:
         cur_list = txt2csv_day(file)
-        #visit = pd.concat([visit,cur_df],sort=False,ignore_index=True)
         visit.extend(cur_list)
         print(file_num,cur_num)
         cur_num += 1
 
-    visit = pd.DataFrame(visit,columns = ['year','month','day','numbers','area_id','func_id'])
-    visit.to_csv('visit_day.csv',index=False)
+    visit = pd.DataFrame(visit,columns = ['year','month','day','numbers','area_id'])
+    visit.to_csv('visit_day_test.csv',index=False)
     end = time.time()
     print(end-start)
 
@@ -159,8 +157,8 @@ def get_visit_quarter():
 
 
 if __name__ == '__main__':
-    get_visit_hour() #精确到小时的人数统计，需要分批处理后合并
-    #get_visit_day()  #精确到天的人数统计，这里统计的是人次，同一个人同一天内的多次访问算一次
+    #get_visit_hour() #精确到小时的人数统计，需要分批处理后合并
+    get_visit_day()  #精确到天的人数统计，这里统计的是人次，同一个人同一天内的多次访问算一次
     #get_visit_quarter() #精确到时段（比如上午，下午），同一个人在一天内的某个时段多次访问算一次(分批处理)
 
 

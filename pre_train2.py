@@ -123,6 +123,7 @@ def get_dif_cate_features(df,cate):
 #获取所有训练集特征
 def get_train_features():
     visit = pd.read_hdf('visit_hour_new.h5')
+    visit = visit.iloc[:100000,:]
     visit_area = visit.groupby('area_id') #按照area_id进行分组
     length = len(visit_area)  #统计共有多少分组
     index = 0  #记录当前处理的是第多少个分组

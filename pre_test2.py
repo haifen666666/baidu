@@ -188,7 +188,7 @@ def get_train_features():
               'area_id']
 
     features = pd.DataFrame(features,columns = column)
-    features.to_csv('test_feature.csv',index=False)
+    features.to_csv('train_feature.csv',index=False)
 
 
 if __name__ == '__main__':
