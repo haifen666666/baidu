@@ -53,7 +53,7 @@ def train(filename):
                                          'top1_2','top2_2','top3_2','top1_3','top2_3','top3_3',
                                          'top1_4','top2_4','top3_4','top1_5','top2_5','top3_5',
                                          'top1_6','top2_6','top3_6','top1_7','top2_7','top3_7'],
-                    valid_sets=lgb_eval, early_stopping_rounds = 300)
+                    valid_sets=lgb_eval, early_stopping_rounds = 100)
     #线下验证正确率
     pred =model_train.predict(x_test)
     pred = [list(x).index(max(x)) for x in pred]
@@ -122,11 +122,11 @@ def run_lgb():
               'meanC13','meanD13','meanE13','meanA05','meanB05','meanC05','meanD05','meanE05','meanA06','meanB06','meanC06',
               'meanD06','meanE06','meanA07','meanB07','meanC07','meanD07','meanE07','area_id','answer']
 
-    train('train_feature4.csv')
+    train('train_feature6.csv')
 
 def predict():
     model = lgb.Booster(model_file = 'lgb1.model') #init model
-    test = pd.read_csv('test_feature4.csv')
+    test = pd.read_csv('test_feature6.csv')
     test.sort_values('area_id',inplace=True)
 
     submit = test[['area_id']]

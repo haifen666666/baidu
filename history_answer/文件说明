@@ -3,5 +3,10 @@ pre_train2.py  对小时粒度数据 打上时间标签 提取特征 visit_hour_
 pre_train3.py  对小时粒度的特征构建组合特征  train_feature2.csv
 pre_train4.py  添加day维度的特征  train_feature3.csv
 feature_merge.py   融合 wjy特征和day维度特征  train_feature4.csv
+pre_train5.py  添加quarter维度特征  train_feature5.csv
+feature_merge.py   融合 train_feature4f.csv 和  train_feature5.csv 得到最终使用的  train_feature6.csv
+
+
+所有的test同train
 
 

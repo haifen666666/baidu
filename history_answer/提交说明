@@ -7,3 +7,5 @@ submit4   得分 0.6444   logloss 1.163  ps: 融合汪佳宇特征 + lgb调参  
 submit5   得分 0.6516   logloss 1.116  ps： 新添加根据day做的特征，训练时加了两次shuffle(打散训练集顺序，让answer越乱越好)
                                            线下分数 0.64475
 
+submit6   得分 0.6606   logloss 1.106  ps： 新添加根据quarter做的特征，训练时的shuffle影响很大(这里的结果是五次提交中分最高的)
+                                           线下分数 0.6536
