@@ -10,16 +10,33 @@ from sklearn.utils import shuffle
 
 def train(filename):
     train = pd.read_csv(filename)
-    train = shuffle(train)
-    train = shuffle(train)
-    #train = train[columns]
     train['answer'] = train['answer'] - 1
-    answer = train[['answer']]
 
-    del train['answer']
-    del train['area_id']
-    del train['label']
-    x_train, x_test, y_train, y_test = train_test_split(train,answer, test_size = 0.2, random_state = 100)
+    tt_valid = pd.read_csv('tt_val.csv')
+    tt_list = list(tt_valid['Id'])
+    train_new = train[~train['area_id'].isin(tt_list)]
+    test_new = train[train['area_id'].isin(tt_list)]
+
+    del train_new['area_id']
+    del train_new['label']
+    y_train = train_new[['answer']]
+    del train_new['answer']
+    x_train = train_new
+
+
+    valid = test_new[['area_id']]
+    del test_new['area_id']
+    del test_new['label']
+    y_test = test_new[['answer']]
+    del test_new['answer']
+    x_test = test_new
+
+    answer = pd.concat([y_train,y_test],ignore_index=True)
+    train = pd.concat([x_train,x_test],ignore_index=True)
+    print(answer.shape,train.shape)
+
+
+
 
     lgb_train = lgb.Dataset(x_train, y_train, free_raw_data=False)
     lgb_eval = lgb.Dataset(x_test, y_test, reference=lgb_train, free_raw_data=False)
@@ -58,17 +75,17 @@ def train(filename):
     pred =model_train.predict(x_test)
     pred = [list(x).index(max(x)) for x in pred]
     actually = list(y_test['answer'])
-    print(len(pred),len(actually))
-    print(type(pred),type(actually))
     observe = pd.DataFrame()
+    observe['Id'] = valid['area_id']
     observe['pred'] = pred
     observe['actually'] = actually
     observe['equal'] = observe['pred'] - observe['actually']
+    observe.to_csv('zyn_observe.csv',index=False)
     right = observe[observe['equal'] == 0].shape[0]
     all = observe.shape[0]
     print(right/all)
-
     print(model_train.best_iteration)
+    '''
     model = lgb.train(params, lgb_all, model_train.best_iteration,
                      categorical_feature=['top1_0','top2_0','top3_0','top1_1','top2_1','top3_1',
                                          'top1_2','top2_2','top3_2','top1_3','top2_3','top3_3',
@@ -79,6 +96,7 @@ def train(filename):
     dfFeature['featureName'] = model.feature_name()
     dfFeature['score'] = model.feature_importance()
     dfFeature.to_csv('featureImportance1.csv')
+    '''
 
 
 
@@ -159,8 +177,8 @@ def predict():
 
 
 if __name__ == '__main__':
-    #run_lgb()
-    predict()
+    run_lgb()
+    #predict()
 
 
 

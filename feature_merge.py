@@ -54,7 +54,6 @@ train3['mean_A7_day7'] = train3['meanA7'] / (train3['day_mean7'] + 0.0001)
 train3.to_csv('test_feature4.csv',index=False)
 '''
 
-'''
 #训练集   融合quarter层级特征  +   组合特征
 train = pd.read_csv('train_feature5.csv')
 train2 = pd.read_csv('train_feature4.csv')
@@ -134,7 +133,6 @@ train3['mean_qE0_day7'] = train3['q_meanE7'] / (train3['day_mean7'] + 0.001)
 
 train3.to_csv('train_feature6.csv',index=False)
 '''
-
 #测试集   融合quarter层级特征  +   组合特征
 train = pd.read_csv('test_feature5.csv')
 train2 = pd.read_csv('test_feature4.csv')
@@ -213,3 +211,5 @@ train3['mean_qD0_day7'] = train3['q_meanD7'] / (train3['day_mean7'] + 0.001)
 train3['mean_qE0_day7'] = train3['q_meanE7'] / (train3['day_mean7'] + 0.001)
 
 train3.to_csv('test_feature6.csv',index=False)
+
+'''
